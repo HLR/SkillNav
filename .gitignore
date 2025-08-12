@@ -1,0 +1,14 @@
+# Ignore all files in these folders but keep the folder itself
+ScaleVLN/datasets/R2R/connectivity/*
+ScaleVLN/datasets/R2R/features/*
+ScaleVLN/datasets/R2R/connectivity_mp3d/*
+ScaleVLN/datasets/R2R/candidates/*
+ScaleVLN/datasets/R2R/annotations/*
+
+# Allow the folder placeholders
+!ScaleVLN/datasets/R2R/connectivity/.gitkeep
+!ScaleVLN/datasets/R2R/features/.gitkeep
+!ScaleVLN/datasets/R2R/connectivity_mp3d/.gitkeep
+!ScaleVLN/datasets/R2R/candidates/.gitkeep
+!ScaleVLN/datasets/R2R/annotations/.gitkeep
+EOF
