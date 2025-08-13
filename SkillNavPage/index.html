@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Breaking Down and Building Up: Mixture of Skill-Based Vision-and-Language Navigation Agents</title>
+
+  <!-- Social preview (fill these out!) -->
+  <meta name="description"
+    content="SkillNav: a mixture-of-skill VLN agent with a VLM router and structured skill decomposition." />
+  <meta property="og:title" content="SkillNav: Mixture of Skill-Based VLN Agents" />
+  <meta property="og:description"
+    content="Structured skill-based reasoning for VLN with strong generalization to GSA-R2R." />
+  <meta property="og:url" content="REPLACE_WITH_YOUR_URL" />
+  <meta property="og:image" content="static/images/social_banner.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:title" content="SkillNav: Mixture of Skill-Based VLN Agents" />
+  <meta name="twitter:description" content="Structured skill-based reasoning for VLN with strong generalization." />
+  <meta name="twitter:image" content="static/images/social_banner.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="keywords" content="vision-and-language navigation, VLN, mixture-of-experts, skills, SkillNav" />
+
+  <link rel="icon" type="image/png" href="src/favicon.png" />
+  <link
+    href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Noto+Sans:400,500|Castoro:400,700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="static/css/bulma.min.css" />
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" />
+
+  <!-- Minimal page-specific styles to match the clean ProbeX vibe -->
+  <style>
+    :root {
+      --fg: #111827;
+      /* gray-900 */
+      --muted: #6b7280;
+      /* gray-500 */
+      --accent: #111827;
+      /* subtle dark accents */
+      --card: #ffffff;
+      --card-border: #e5e7eb;
+      /* gray-200 */
+    }
+
+    html,
+    body {
+      color: var(--fg);
+    }
+
+    body {
+      font-family: "Noto Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Google Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .hero {
+      background: #fff;
+    }
+
+    .publication-title {
+      letter-spacing: -0.02em;
+    }
+
+    .pub-links .button {
+      margin: 0 .25rem .5rem;
+    }
+
+    /* Figure styling */
+    figure.paper-figure {
+      margin: 2rem auto;
+      max-width: 1100px;
+    }
+
+    .figure-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .04);
+      overflow: hidden;
+    }
+
+    .figure-card img,
+    .figure-card picture,
+    .figure-card object {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    figcaption {
+      color: var(--muted);
+      font-size: .95rem;
+      text-align: center;
+      padding: .85rem 1rem 0;
+    }
+
+    /* Simple responsive gallery for multiple figures */
+    .gallery {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 900px) {
+      .gallery {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Table polish */
+    table.table th,
+    table.table td {
+      vertical-align: middle;
+    }
+
+    table.table thead th {
+      background: #f9fafb;
+    }
+
+    /* Footer */
+    footer.footer {
+      border-top: 1px solid var(--card-border);
+      background: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header / Title -->
+  <section class="hero is-small">
+    <div class="hero-body">
+      <div class="container is-max-desktop has-text-centered">
+        <h1 class="title is-1 publication-title">Breaking Down and Building Up: Mixture of Skill-Based
+          Vision-and-Language Navigation Agents</h1>
+        <p class="is-size-5">
+          <a href="https://www.egr.msu.edu/~matiany3/" target="_blank">Tianyi Ma</a>,
+          <a href="https://zhangyuejoslin.github.io" target="_blank">Yue Zhang</a>,
+          <a href="https://homes.esat.kuleuven.be/~zwang/" target="_blank">Zehao Wang</a>,
+          <a href="https://www.cse.msu.edu/~kordjams/" target="_blank">Parisa Kordjamshidi</a>
+        </p>
+        <p class="is-size-6" style="margin-top:.25rem">Michigan State University · ESAT‑PSI, KU Leuven</p>
+
+        <div class="pub-links" style="margin-top:1rem">
+          <a class="button is-dark is-rounded" target="_blank" href="https://arxiv.org/pdf/2508.07642.pdf">
+            <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span>
+          </a>
+          <a class="button is-dark is-rounded" target="_blank" href="https://github.com/HLR/SkillNav">
+            <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
+          </a>
+          <a class="button is-dark is-rounded" target="_blank" href="https://arxiv.org/abs/2508.07642">
+            <span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Teaser Figure -->
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <p>
+          <img src="static/images/Teaser_SkillNav.png" alt="SkillNav Teaser" class="blend-img-background center-image"
+            style="max-width: 100%; height: auto;">
+        </p>
+        <br>
+        <p>
+          SkillNav decomposes complex navigation instructions into atomic skills and flexibly recomposes them
+          to address diverse instruction styles and visual scenarios. </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abstract -->
+  <section class="section is-light" id="abstract">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Vision-and-Language Navigation (VLN) poses significant challenges in enabling agents to interpret natural
+              language instructions and navigate complex 3D environments. While recent progress has been driven by
+              large-scale pre-training and data augmentation, current methods still struggle to generalize to unseen
+              scenarios, particularly when complex spatial and temporal reasoning is required. In this work, we propose
+              SkillNav, a modular framework that introduces structured, skill-based reasoning into Transformer-based VLN
+              agents. Our method decomposes navigation into a set of interpretable atomic skills (e.g., Vertical
+              Movement, Area and Region Identification, Stop and Pause), each handled by a specialized agent. We then
+              introduce a novel zero-shot Vision-Language Model (VLM)-based router, which dynamically selects the most
+              suitable agent at each time step by aligning sub-goals with visual observations and historical actions.
+              SkillNav achieves a new state-of-the-art performance on the R2R benchmark and demonstrates strong
+              generalization to the GSA-R2R benchmark that includes novel instruction styles and unseen environments.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Method & Qualitative (gallery of beautiful static figures) -->
+
+  <section class="section hero is-small is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <div class="content">
+            <h2 class="title is-3">Architecture of SkillNav: LLM Reordering, VLM Router, and Skill-Based Agents</h2>
+            <div class="level-set has-text-justified">
+              <p>
+                <img src="static/images/Architecture_SkillNav.png" alt="Sizes of model trees"
+                  class="blend-img-background center-image" style="max-width: 100%; height: auto;">
+              </p>
+              <p>
+                SkillNav architecture. A temporal reordering module converts instructions into structured action
+                goals. A VLM‑based router localizes the current sub‑goal and selects a specialized skill agent.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Results Table (kept, lightly styled via Bulma) -->
+  <section class="section" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Performance Comparison</h2>
+      <div style="overflow-x:auto;">
+        <!-- Paste your existing table unchanged -->
+        <table class="table is-bordered is-striped is-hoverable is-fullwidth has-text-centered">
+          <thead>
+            <tr>
+              <th rowspan="3">Methods</th>
+              <th rowspan="3">#</th>
+              <th colspan="8">R2R</th>
+              <th colspan="6">GSA-R2R</th>
+            </tr>
+            <tr>
+              <th colspan="4">Val-Unseen</th>
+              <th colspan="4">Test-Unseen</th>
+              <th colspan="2">Test-R-Basic</th>
+              <th colspan="2">Test-N-Basic</th>
+              <th colspan="2">Test-N-Scene</th>
+            </tr>
+            <tr>
+              <th>NE↓</th>
+              <th>OSR↑</th>
+              <th>SR↑</th>
+              <th>SPL↑</th>
+              <th>NE↓</th>
+              <th>OSR↑</th>
+              <th>SR↑</th>
+              <th>SPL↑</th>
+              <th>SR↑</th>
+              <th>SPL↑</th>
+              <th>SR↑</th>
+              <th>SPL↑</th>
+              <th>SR↑</th>
+              <th>SPL↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- (Your table body rows preserved exactly as in your original file) -->
+            <tr class="has-background-grey-lighter">
+              <td colspan="16"><em>LLM-based VLN</em></td>
+            </tr>
+            <tr>
+              <td>MapGPT (GPT4v)</td>
+              <td>1</td>
+              <td>5.63</td>
+              <td>58</td>
+              <td>44</td>
+              <td>35</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>34</td>
+              <td>30</td>
+              <td>25</td>
+              <td>23</td>
+              <td>25</td>
+              <td>23</td>
+            </tr>
+            <tr>
+              <td>NavCoT (LLaMA2)</td>
+              <td>2</td>
+              <td>6.26</td>
+              <td>42</td>
+              <td>34</td>
+              <td>29</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>37</td>
+              <td>35</td>
+              <td>29</td>
+              <td>26</td>
+              <td>29</td>
+              <td>26</td>
+            </tr>
+            <tr>
+              <td>NavGPT-2 (FlanT5-5B)</td>
+              <td>3</td>
+              <td>3.13</td>
+              <td>81</td>
+              <td>72</td>
+              <td>61</td>
+              <td>3.33</td>
+              <td>80</td>
+              <td>72</td>
+              <td>60</td>
+              <td>58</td>
+              <td>45</td>
+              <td>48</td>
+              <td>35</td>
+              <td><strong>57</strong></td>
+              <td><u>43</u></td>
+            </tr>
+            <tr>
+              <td>NaviLLM (Vicuna-7B)</td>
+              <td>4</td>
+              <td>3.51</td>
+              <td>--</td>
+              <td>67</td>
+              <td>59</td>
+              <td>3.71</td>
+              <td>--</td>
+              <td>68</td>
+              <td>60</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+            </tr>
+            <tr class="has-background-grey-lighter">
+              <td colspan="16"><em>Supervised VLN</em></td>
+            </tr>
+            <tr>
+              <td>HAMT</td>
+              <td>5</td>
+              <td>2.29</td>
+              <td>--</td>
+              <td>66</td>
+              <td>61</td>
+              <td>3.93</td>
+              <td>72</td>
+              <td>65</td>
+              <td>60</td>
+              <td>48</td>
+              <td>44</td>
+              <td>42</td>
+              <td>38</td>
+              <td>34</td>
+              <td>30</td>
+            </tr>
+            <tr>
+              <td>DUET</td>
+              <td>6</td>
+              <td>3.31</td>
+              <td>81</td>
+              <td>72</td>
+              <td>60</td>
+              <td>3.65</td>
+              <td>76</td>
+              <td>69</td>
+              <td>59</td>
+              <td>58</td>
+              <td>47</td>
+              <td>48</td>
+              <td>37</td>
+              <td>40</td>
+              <td>30</td>
+            </tr>
+            <tr>
+              <td>BEVBERT</td>
+              <td>7</td>
+              <td>2.81</td>
+              <td>84</td>
+              <td>75</td>
+              <td>64</td>
+              <td>3.13</td>
+              <td>81</td>
+              <td>73</td>
+              <td>62</td>
+              <td>58</td>
+              <td>45</td>
+              <td>46</td>
+              <td>35</td>
+              <td>39</td>
+              <td>27</td>
+            </tr>
+            <tr>
+              <td>GR-DUET</td>
+              <td>8</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>69</td>
+              <td>64</td>
+              <td>57</td>
+              <td>52</td>
+              <td>48</td>
+              <td><u>43</u></td>
+            </tr>
+            <tr>
+              <td>ScaleVLN †</td>
+              <td>9</td>
+              <td>2.34</td>
+              <td>87</td>
+              <td>79</td>
+              <td>70</td>
+              <td>2.73</td>
+              <td><u>84</u></td>
+              <td>77</td>
+              <td>68</td>
+              <td><u>78</u></td>
+              <td><u>67</u></td>
+              <td><u>69</u></td>
+              <td><u>57</u></td>
+              <td><u>55</u></td>
+              <td><u>43</u></td>
+            </tr>
+            <tr>
+              <td>SRDF †</td>
+              <td>10</td>
+              <td>1.83</td>
+              <td><strong>89</strong></td>
+              <td><strong>84</strong></td>
+              <td><strong>78</strong></td>
+              <td>1.88</td>
+              <td><strong>88</strong></td>
+              <td><strong>84</strong></td>
+              <td>77</td>
+              <td>71</td>
+              <td>63</td>
+              <td>59</td>
+              <td>49</td>
+              <td>52</td>
+              <td><u>43</u></td>
+            </tr>
+            <tr class="has-background-grey-lighter">
+              <td colspan="16"><em>Our Mixture of Skill-based VLN</em></td>
+            </tr>
+            <tr>
+              <td>SkillNav † (ours)</td>
+              <td>11</td>
+              <td>1.97</td>
+              <td><strong>89</strong></td>
+              <td><u>83</u></td>
+              <td><u>77</u></td>
+              <td>2.53</td>
+              <td>83</td>
+              <td><u>78</u></td>
+              <td><u>70</u></td>
+              <td><strong>79</strong></td>
+              <td><strong>69</strong></td>
+              <td><strong>72</strong></td>
+              <td><strong>61</strong></td>
+              <td><strong>57</strong></td>
+              <td><strong>48</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="is-size-6 has-text-grey">† indicates large-scale data augmentation. SRDF performs best on R2R due to
+        extensive pretraining on data that mimics R2R-style instructions; however, it struggles to generalize
+        effectively to the more challenging GSA-R2R dataset.</p>
+    </div>
+  </section>
+
+  <!-- BibTeX -->
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>@misc{ma2025breakingbuildingupmixture,
+  title={Breaking Down and Building Up: Mixture of Skill-Based Vision-and-Language Navigation Agents},
+  author={Tianyi Ma and Yue Zhang and Zehao Wang and Parisa Kordjamshidi},
+  year={2025},
+  eprint={2508.07642},
+  archivePrefix={arXiv},
+  primaryClass={cs.AI},
+  url={https://arxiv.org/abs/2508.07642}
+}</code></pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template"
+                target="_blank">Academic Project Page Template</a> which was adopted from the <a
+                href="https://nerfies.github.io" target="_blank">Nerfies</a> project page. You are free to borrow the
+              source code of this website, we just ask that you link back to this page in the footer. <br /> This
+              website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"
+                target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
