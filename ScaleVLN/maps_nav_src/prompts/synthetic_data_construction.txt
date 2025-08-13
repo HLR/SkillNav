@@ -1,0 +1,42 @@
+You are an expert in Vision-and-Language Navigation (VLN) and Language.
+
+<Task>
+- Generate a **single** natural-language instruction that guides an agent through the scene.
+
+<Input>
+- A visual sequence (an ordered list of images)
+- A specific navigation skill to emphasize
+
+<Requirements>
+- The instruction should describe what the agent does across the image sequence (e.g., move, climb, pause).
+- Ground the instruction in **visible cues**, such as layout, objects, stairs, doorways, lighting, or orientation.
+- Emphasize the given **target skill** (e.g., "Direction Adjustment", "Vertical Movement", etc.), while naturally incorporating other relevant details as needed.
+- The output must be a **single sentence**, written in fluent, natural language (no lists, quotes, or symbols).
+- Instruction length should be **20-30 words** (aim for ~25).
+- Do **not** include explanations, reasoning steps, or metadata output only the instruction itself.
+
+<Available Skills>
+{Direction Adjustment, Vertical Movement, Stop and Pause, Landmark Detection, Area and Region Identification}
+
+<Skill Definitions>
+- **Direction Adjustment**: Involves turning or changing heading. Look for instructions like ``turn left'', ``go back'', or ``face the hallway''. Used when the agent needs to rotate or reorient without necessarily changing position.
+
+- **Vertical Movement**: Involves moving across floors or elevation changes. Triggered by terms like ``go upstairs'', ``down the stairs'', or ``take the elevator''. Watch for floor changes in visuals or references to vertical navigation.
+
+- **Stop and Pause**: Involves coming to a full stop at a defined point. Use lighter-weight verbs such as pause, wait, and stand, when the stop happens in the middle of sequence (e.g., ``pause by the red sofa''). Use stronger, more terminal verbs like stop and come to a stop for the final action or true endpoint (e.g., ``stop at the glass doors''). This distinction helps the agent decide whether to hold briefly or end its navigation.
+
+- **Landmark Detection**: Requires identifying and responding to specific objects or features in the environment. Triggered by mentions of visible items like ``lamp'', ``chair'', ``red sofa'', ``painting''. Used when object recognition is necessary to proceed or confirm position.
+
+- **Area and Region Identification**: Involves recognizing or transitioning between distinct spaces or rooms. Triggered by mentions like ``enter the kitchen'', ``in the bedroom'', ``exit hallway''. Requires understanding of semantic regions based on context or appearance.
+
+
+<Output Format>
+Return only the instruction sentence. Do not include tags, labels, or formatting.
+
+---
+
+<Trajectory Images>
+``{path_images}''
+
+<Focused Skill>
+``{skill_name}''
