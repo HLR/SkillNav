@@ -219,17 +219,12 @@
           <h2 class="title is-3">Abstract</h2>
           <div class="content has-text-justified">
             <p>
-              Vision-and-Language Navigation (VLN) poses significant challenges in enabling agents to interpret natural
-              language instructions and navigate complex 3D environments. While recent progress has been driven by
-              large-scale pre-training and data augmentation, current methods still struggle to generalize to unseen
-              scenarios, particularly when complex spatial and temporal reasoning is required. In this work, we propose
-              SkillNav, a modular framework that introduces structured, skill-based reasoning into Transformer-based VLN
-              agents. Our method decomposes navigation into a set of interpretable atomic skills (e.g., Vertical
-              Movement, Area and Region Identification, Stop and Pause), each handled by a specialized agent. We then
-              introduce a novel zero-shot Vision-Language Model (VLM)-based router, which dynamically selects the most
-              suitable agent at each time step by aligning sub-goals with visual observations and historical actions.
-              SkillNav achieves a new state-of-the-art performance on the R2R benchmark and demonstrates strong
-              generalization to the GSA-R2R benchmark that includes novel instruction styles and unseen environments.
+              Vision-and-Language Navigation (VLN) poses significant challenges for agents to interpret natural language instructions and navigate complex 3D environments. 
+              While recent progress has been driven by large-scale pre-training and data augmentation, current methods still struggle to generalize to unseen scenarios, particularly when complex spatial and temporal reasoning is required. 
+              In this work, we propose SkillNav, a modular framework that introduces structured, skill-based reasoning into Transformer-based VLN agents. Our method decomposes navigation into a set of interpretable atomic skills (e.g., Vertical Movement, Area and Region Identification, Stop and Pause), each handled by a specialized agent. 
+              To support targeted skill training without manual data annotation, we construct a synthetic dataset pipeline that generates diverse, linguistically natural, skill-specific instruction-trajectory pairs.
+              We then introduce a novel training-free Vision-Language Model (VLM)-based router, which dynamically selects the most suitable agent at each time step by aligning sub-goals with visual observations and historical actions. 
+              SkillNav obtains competitive results on commonly-used benchmarks, and establishes state-of-the-art generalization to the GSA-R2R, a benchmark with novel instruction styles and unseen environments.
             </p>
           </div>
         </div>
@@ -490,11 +485,29 @@
               <td><u>43</u></td>
             </tr>
             <tr class="has-background-grey-lighter">
-              <td colspan="16"><em>Our Mixture of Skill-based VLN</em></td>
+              <td colspan="16"><em>Mixture of Skill-based VLN</em></td>
+            </tr>
+            <tr>
+              <td>SAME</td>
+              <td>11</td>
+              <td>2.73</td>
+              <td>--</td>
+              <td>76</td>
+              <td>66</td>
+              <td>3.03</td>
+              <td>--</td>
+              <td>74</td>
+              <td>64</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
+              <td>--</td>
             </tr>
             <tr>
               <td>SkillNav † (ours)</td>
-              <td>11</td>
+              <td>12</td>
               <td>1.97</td>
               <td><strong>89</strong></td>
               <td><u>83</u></td>
