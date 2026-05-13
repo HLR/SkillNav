@@ -1,0 +1,220 @@
+import os
+import json
+import base64
+from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_random_exponential
+import logging
+from tqdm import tqdm
+from pathlib import Path
+import random
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+
+MAX_RETRIES = 5
+NUM_THREADS = 8  # adjust based on CPU capacity
+
+AVAILABLE_SKILLS = [
+    "Directional Adjustment",
+    "Vertical Movement",
+    "Halt and Pause",
+    "Landmark Detection",
+    "Area and Region Identification",
+]
+
+SKILL_DESCRIPTION = {
+    "Directional Adjustment": "Involves turning or changing heading. Look for instructions like 'turn left', 'go back', or 'face the hallway'. Used when the agent needs to rotate or reorient without necessarily changing position.",
+    "Vertical Movement" : "Involves moving across floors or elevation changes. Triggered by terms like 'go upstairs', 'down the stairs', or 'take the elevator'. Watch for floor changes in visuals or references to vertical navigation.", 
+    "Halt and Pause": "Involves stopping at a specific location. Triggered by instructions like 'stop', 'wait', or 'stand in front of'. Used when the endpoint or a mid-action pause is important.",
+    "Landmark Detection": "Requires identifying and responding to specific objects or features in the environment. Triggered by mentions of visible items like 'lamp', 'chair', 'red sofa', 'painting'. Used when object recognition is necessary to proceed or confirm position.",
+    "Area and Region Identification": "Involves recognizing or transitioning between distinct spaces or rooms. Triggered by mentions like 'enter the kitchen', 'in the bedroom', 'exit hallway'. Requires understanding of semantic regions based on context or appearance."
+}
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# print("Using OpenAI API key:", os.getenv("OPENAI_API_KEY"))
+
+# retry‐wrapped LLM call
+@retry(
+    wait=wait_random_exponential(multiplier=1, max=60),
+    stop=stop_after_attempt(MAX_RETRIES)
+)
+def _completion_with_backoff(client, **kwargs):
+    return client.chat.completions.create(**kwargs)
+
+
+def load_vocabulary():
+
+    up_vocab_path = "/home/matiany3/MapGPT/datasets/R2R/vocabulary/vertical_vocabulary_upstair.txt"
+    down_vocab_path = "/home/matiany3/MapGPT/datasets/R2R/vocabulary/vertical_vocabulary_downstair.txt"
+    
+    with open(up_vocab_path, 'r') as f:
+        up_vocab =  [line.strip() for line in f.readlines() if line.strip()]
+    
+    with open(down_vocab_path, 'r') as f:
+        down_vocab = [line.strip() for line in f.readlines() if line.strip()]
+    
+    return up_vocab, down_vocab
+
+
+def construct_vertical_dataset_multi_steps(
+    candidate_file_paths,
+    up_vocab,
+    down_vocab,
+    save_path,
+    min_action_len=4,
+    max_action_len=7,
+    begin_index=0,
+    end_index=-1
+):
+    """
+    Build a dataset of vertical trajectories (up/down) where each trajectory's
+    image_list length is between min_action_len and max_action_len.
+    
+    candidate_file_paths: list of JSON paths to load and merge
+    up_vocab, down_vocab: lists of instructions for up/down moves
+    save_path: where to dump the final JSON
+    """
+    ELEVATION_LIMIT = 2
+    
+    # 1) Load & merge all candidate files
+    data = {}
+    for fp in candidate_file_paths:
+        with open(fp, 'r') as f:
+            this_data = json.load(f)
+        data.update(this_data)
+    
+    output_data = []
+    path_counter = 0
+    
+    # 2) Prebuild a global lookup of all viewpoints
+    scan_items = list(data.items())[begin_index:end_index]
+    global_vp_lookup = {
+        vp_id: vp_data
+        for _, viewpoints in scan_items
+        for vp_entry in viewpoints
+        for vp_id, vp_data in vp_entry.items()
+    }
+    
+    # seen_suffixes = {}  
+    # # maps suffix‐tuple → dict(index_in_output, best_distance)
+    
+    # 3) Iterate scans → viewpoints → candidates
+    for scan_id, viewpoints in tqdm(scan_items, desc="Processing scans"):
+        for vp_entry in viewpoints:
+            for viewpoint_id, viewpoint_data in vp_entry.items():
+                for cand in viewpoint_data.get("candidates", []):
+                    elevation = cand.get("elevation", 0.0)
+                    if abs(elevation) <= ELEVATION_LIMIT:
+                        continue
+                    if str(cand.get("vertical_recognition", "")).strip().lower() != "yes":
+                        continue
+
+                    label = 'up' if elevation > 0 else 'down'
+                    vocab = up_vocab if label == 'up' else down_vocab
+                    instruction = random.choice(vocab)
+
+                    # initialize path & image_list
+                    path = [viewpoint_id, cand.get("viewpointId")]
+                    folder = os.path.dirname(cand.get("image_path_view", ""))
+                    image_list = [
+                        os.path.join(folder, "12.jpg"),
+                        cand.get("image_path_view")
+                    ]
+                    total_distance = cand.get("distance", 0.0)
+                    heading = cand.get("heading", 0.0)
+                    
+                    # grow the trajectory up to max_action_len
+                    current_vpid = cand.get("viewpointId")
+                    while len(image_list) < max_action_len:
+                        nxt = global_vp_lookup.get(current_vpid, {})
+                        if not nxt:
+                            break
+                        extended = False
+                        for nc in nxt.get("candidates", []):
+                            elev = nc.get("elevation", 0.0)
+                            if (
+                                str(nc.get("vertical_recognition", "")).strip().lower() == "yes"
+                                and ('up' if elev > 0 else 'down') == label
+                            ):
+                                path.append(nc["viewpointId"])
+                                image_list.append(nc["image_path_view"])
+                                total_distance += nc.get("distance", 0.0)
+                                current_vpid = nc["viewpointId"]
+                                extended = True
+                                break
+                        if not extended:
+                            break
+
+                    # only save if length in [min_action_len, max_action_len]
+                    if min_action_len <= len(image_list) <= max_action_len:
+                        out_entry = {
+                            "distance": round(total_distance, 2),
+                            "heading": round(heading, 3),
+                            "instr_id": f"{path_counter}_{cand.get('pointId')}",
+                            "instruction": instruction,
+                            "path": path,
+                            "path_id": path_counter,
+                            "scan": scan_id,
+                            "image_list": image_list
+                        }
+                        output_data.append(out_entry)
+                        path_counter += 1
+
+    # 4) Write out
+    with open(save_path, 'w') as f:
+        json.dump(output_data, f, indent=2)
+    print(f"Saved {len(output_data)} entries to {save_path}")
+    
+
+def generate_instruction_gpt4o(client, image_list, skill, model="gpt-4o", temperature=0.6, max_tokens=3000):
+    # 1) system prompt (list all skills)
+    system_prompt = (
+        "You are an expert in Vision-and-Language Navigation (VLN).\n"
+        "Given a visual sequence (an ordered list of images) and a \"skill\" to emphasize—\n"
+        f"one of: {', '.join(AVAILABLE_SKILLS)}—your job is to generate a **single** "
+        "natural-sounding navigation instruction that:\n"
+        "- Describes what the agent does across these images (moves, climbs, pauses, etc.).\n"
+        "- Is grounded in **visible** cues (layout, objects, stairs, rails, doorways, lighting).\n"
+        "- Emphasizes the requested skill, but may also mention other relevant aspects.\n"
+        "- Is **20–30 words** long (aim for ~25 words).\n"
+        "- Uses varied, fluent, and common language—no jargon, no backslashes or quotes, no list formatting.\n"
+        "- Does **not** include explanations, reasoning steps, or metadata—**only** the final instruction sentence."
+    )
+    
+    # 2) assemble the vision + text user message
+    user_content = []
+    for i, img_path in enumerate(image_list, start=1): # Skip the first image
+        if img_path and os.path.isfile(img_path):
+            with open(img_path, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode("utf-8")
+            user_content.append(
+                {"type": "text", "text": f"Image: Frame {i}"}
+            )
+            user_content.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{b64}",
+                    "detail": "low"
+                }
+            })
+        else:
+            user_content.append(
+                {"type": "text", "text": f"Frame {i} not found."}
+            )
+        
+    # final text prompt with skill context
+    user_content.append({
+        "type": "text",
+        "text": (
+            f"Emphasis skill: {skill}. "
+            f"{SKILL_DESCRIPTION.get(skill, '')}\n\n"
+            "Generate one clear, human-like navigation instruction (~20–30 words) "
+            "that describes the agent’s movement through these images, is grounded in what’s visible, "
+            "and highlights the requested skill."
+        )
+    })
+
+
+
+
+
