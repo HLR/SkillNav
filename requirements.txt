@@ -1,3 +1,29 @@
-vllm=0.9.2
-torch=2.7.0
-transformers=4.53.1
+# Core deep-learning stack
+torch>=2.1
+torchvision
+numpy
+einops
+tqdm
+
+# Transformers + VLMs (router)
+transformers>=4.45
+accelerate
+sentencepiece
+qwen-vl-utils
+vllm>=0.6
+openai>=1.50
+tenacity
+
+# Vision / IO
+Pillow
+opencv-python
+
+# Graph / data
+networkx
+h5py
+jsonlines
+lmdb
+
+# Profiling / utilities
+line_profiler
+httpx

@@ -1,0 +1,58 @@
+IDENTIFY_REASONING_GUIDE = """
+Step-by-Step Reasoning Instructions:
+1.	Decompose the instruction into sub-instructions.
+- Break the full instruction into smaller steps. Each sentence or clause typically represents one step.
+- Example:
+    - Original: “At the bottom of the stairs, go through the nearest archway to your left. Head straight until you enter the room with a pool table. Step slightly to the left to get out of the way.”
+    - Decomposed:
+    - “At the bottom of the stairs, go through the nearest archway to your left.”
+    - “Head straight until you enter the room with a pool table.”
+    - “Step slightly to the left to get out of the way.”
+2.	Analyze the sequence of previous viewpoint images.
+These represent what the agent has already seen or done.
+- If there are no previous images, treat this as the start of the navigation and return the first sub-instruction, exactly as written.
+- If there are previous images, use visual clues (e.g., stairs, archway, pool table) to infer completed actions.
+
+3.	Evaluate each sub-instruction for completion.
+Use spatial and object-based cues to check whether the step has been executed.
+- If the current image shows the agent inside the goal location (e.g., the room with a pool table) and a final positioning instruction exists (e.g., “Step slightly to the left”), that positioning step should be returned next.
+- Do not return earlier steps (e.g., “Head straight…”) once the goal location has been reached.
+- Do not skip to “no further instruction” unless every clause has been addressed.
+
+4.	When the goal location has been reached, and only a final positional instruction remains (e.g., “Wait”, “Step left”), return that as the next sub-instruction.
+
+5.	If not all steps are completed, return the next incomplete sub-instruction, using the exact wording from the original instruction.
+- Never paraphrase or alter the wording.
+
+6.	Avoid repeating sub-instructions that have already been completed based on the visual evidence from previous images.
+
+7.	Output the result in the following JSON format:
+{
+"Sub-instruction to be executed": "<exact next instruction clause>",
+"Reasoning": "<why this is the next step based on image sequence>"
+}
+
+CHECKPOINT:
+If the agent is already inside the goal location and the remaining instruction is positional (e.g., “Step to the left”, “Wait”), then that is the correct next step to return.
+"""
+
+IDENTIFY_SYSTEM_PROMPT = (
+    "You are a visual reasoning assistant for indoor navigation. "
+    "Your task is to analyze a list of previously observed images and a natural language instruction. "
+    "Determine which parts of the instruction have already been completed, and return the next step to be executed.\n\n"
+    "Your response must:\n"
+    "- Return the next action using *exact phrasing* from the original instruction (no paraphrasing).\n"
+    "- Match the sub-instruction to the visual context from previous images.\n"
+    "- If the goal (e.g., pool table) has clearly been reached, return the final sub-instruction.\n"
+    "- If *all* sub-instructions have been completed based on the visual path, do not return anything further. Stop reasoning.\n"
+    # "- After completing all movement sub-instructions, if the final instruction is a waiting or positioning action (e.g., 'wait there', 'step slightly to the left'), you must return it as the last sub-instruction — but only once all movement has been completed."
+    "- If the final destination has been reached and the last step is a positional or waiting action (e.g., 'wait there', 'step to the left'), return that as the next step.\n"
+    "- You must reason about whether the agent is already at the destination."
+    "If the current image shows the goal destination (e.g. inside the room with the pool table, or inside the open doorway), and the instruction contains a final step like 'wait' or 'adjust your position', that is the next sub-instruction."
+    # "IMPORTANT: If no previous images are provided, you must always return the FIRST sub-instruction from the instruction — without exception."
+)
+
+FORMAT_NOTE = """   
+IMPORTANT: Your response must be a valid JSON object without any surrounding text, code blocks, or explanations.
+Do not include markdown formatting like ```json or ```. Just provide the raw JSON object.
+"""

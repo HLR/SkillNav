@@ -1,0 +1,9 @@
+Now, using the instruction and the visual history, identify the next step.
+
+IMPORTANT: Your response must be a valid JSON object without any surrounding text, code blocks, or explanations.
+Do not include markdown formatting like ```json or ```.
+
+<Original Whole Instruction>:
+"{instruction}"
+
+<Previous Viewpoint Images>:

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skillnav"
+version = "0.1.0"
+description = "Mixture of Skill-Based Vision-and-Language Navigation Agents"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Tianyi Ma" },
+    { name = "Yue Zhang" },
+    { name = "Zehao Wang" },
+    { name = "Parisa Kordjamshidi" },
+]
+keywords = [
+    "vision-and-language navigation",
+    "VLN",
+    "mixture-of-experts",
+    "VLM router",
+    "Matterport3D",
+    "R2R",
+    "GSA-R2R",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://hlr.github.io/SkillNav/"
+Repository = "https://github.com/HLR/SkillNav"
+Paper = "https://arxiv.org/abs/2508.07642"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["skillnav*"]
+exclude = ["assets*", "static*", "tests*"]

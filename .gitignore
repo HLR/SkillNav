@@ -1,1 +1,49 @@
-/VLN-SRDF/datasets/SRDF/data/*
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Logs and runtime artifacts
+*.log
+*.out
+runs/
+wandb/
+router_server.log
+
+# Datasets (large, not for GitHub)
+skillnav/backbones/*/datasets/**/features/*
+skillnav/backbones/*/datasets/**/annotations/*.json
+skillnav/backbones/*/datasets/**/trained_models/*
+!skillnav/backbones/*/datasets/**/.gitkeep
+
+# Local / IDE
+.envrc
+.env
+.env.*
+.python-version
+.ipynb_checkpoints/
+
+# Outputs
+output/
+ckpts/
+*.pth
+*.pt
+*.ckpt
+
+# Paper source archives (keep locally only)
+*.zip
+*.tar
+*.tar.gz

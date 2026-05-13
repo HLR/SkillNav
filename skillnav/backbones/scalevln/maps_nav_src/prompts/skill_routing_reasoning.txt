@@ -1,0 +1,56 @@
+AVAILABLE_SKILLS = [
+    "Directional Adjustment",
+    "Vertical Movement",
+    "Halt and Pause",
+    "Landmark Detection",
+    "Area and Region Identification",
+    # "Temporal Order Planning"
+]
+
+SKILL_DESCRIPTION = """
+Navigation Skills:
+- Directional Adjustment:
+Involves turning or changing heading. Look for instructions like "turn left", "go back", or "face the hallway". Used when the agent needs to rotate or reorient without necessarily changing position.
+- Vertical Movement:
+Involves moving across floors or elevation changes. Triggered by terms like "go upstairs", "down the stairs", or "take the elevator". Watch for floor changes in visuals or references to vertical navigation.
+- Halt and Pause:
+Involves stopping at a specific location. Triggered by instructions like "stop", "wait", or "stand in front of". Used when the endpoint or a mid-action pause is important.
+- Landmark Detection:
+Requires identifying and responding to specific objects or features in the environment. Triggered by mentions of visible items like "lamp", "chair", "red sofa", "painting". Used when object recognition is necessary to proceed or confirm position.
+- Area and Region Identification:
+Involves recognizing or transitioning between distinct spaces or rooms. Triggered by mentions like "enter the kitchen", "in the bedroom", "exit hallway". Requires understanding of semantic regions based on context or appearance.
+- Temporal Order Planning:
+Involves following a multi-step or sequential plan. Triggered by words like "after", "then", "before", or instructions that chain together several actions. Requires tracking sequence and dependencies.
+"""
+
+ROUTING_TASK_PROMPT = """
+Your task:
+1. Read and understand the sub-instruction to be executed.
+2. Use the reasoning explanation to infer what skills are likely required to carry out that sub-instruction.
+3. Choose the top 1 skill that is most relevant to the sub-instruction.
+"""
+
+ANALYZE_INPUT_PROMPT = """
+You will be given:
+- The original full navigation instruction.
+- The sub-instruction that should be executed next, based on reasoning.
+- A reasoning explanation derived from the visual history and instruction.
+"""
+
+ANALYZE_EXAMPLE_INPUT = """
+Original Whole Instruction: "At the bottom of the stairs, go through the nearest archway to your left. Head straight until you enter the room with a pool table. Step slightly to the left to get out of the way."
+
+Sub-instruction to be executed for next step: "Head straight until you enter the room with a pool table."
+
+Reasoning based on previous viewpoints path and original instruction: The agent appears to be just outside the archway. The next step is likely to involve entering the archway and preparing to head straight.
+
+Expected Output:
+*****Landmark Detection*****
+"""
+
+<Output Format>:
+Output exactly one skill from the Available Skills list above.
+Use the format:
+*****SKILL_NAME*****
+
+No other text. No explanation. Only the skill name enclosed in *****.
