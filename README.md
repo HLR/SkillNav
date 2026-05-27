@@ -2,7 +2,12 @@
 
 Official code release for **Breaking Down and Building Up: Mixture of Skill-Based Vision-and-Language Navigation Agents**.
 
-[Paper (arXiv)](https://arxiv.org/abs/2508.07642) · [Project page](https://hlr.github.io/SkillNav/) · [Annotations (Google Drive)](https://drive.google.com/drive/folders/1ZYCi2yJAHqk96Ptud6sqQRtWJalIyig7?usp=sharing)
+> 🎉 **Accepted to ACL 2026 (Oral).**
+
+[![arXiv](https://img.shields.io/badge/arXiv-2508.07642-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2508.07642)
+[![Project Page](https://img.shields.io/badge/Project-Page-1f72bd)](https://hlr.github.io/SkillNav/)
+[![Annotations](https://img.shields.io/badge/Annotations-Google%20Drive-4285F4?logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1ZYCi2yJAHqk96Ptud6sqQRtWJalIyig7?usp=sharing)
+[![Checkpoints](https://img.shields.io/badge/Checkpoints-Google%20Drive-34A853?logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1dsZgGvgZghdDMF4gE7dPZJW62YzBQTJF?usp=share_link)
 
 ---
 
@@ -109,6 +114,11 @@ skillnav/backbones/srdf/datasets/R2R/annotations/
 Drop them under each backbone's `datasets/R2R/features/` and
 `datasets/R2R/trained_models/` directories. The bash scripts under each backbone's
 `scripts/` directory reference these paths directly.
+
+We also release the trained weights of the **five skill specialists on R2R**
+(Vertical Movement, Directional Adjustment, Landmark Detection, Area & Region
+Identification, Stop & Pause):
+[Google Drive folder](https://drive.google.com/drive/folders/1dsZgGvgZghdDMF4gE7dPZJW62YzBQTJF?usp=share_link).
 
 ---
 
