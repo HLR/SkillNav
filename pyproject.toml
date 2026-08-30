@@ -38,7 +38,7 @@ dynamic = ["dependencies"]
 [project.urls]
 Homepage = "https://hlr.github.io/SkillNav/"
 Repository = "https://github.com/HLR/SkillNav"
-Paper = "https://arxiv.org/abs/2508.07642"
+Paper = "https://aclanthology.org/2026.acl-long.595/"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

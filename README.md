@@ -4,7 +4,7 @@ Official code release for **Breaking Down and Building Up: Mixture of Skill-Base
 
 > 🎉 **Accepted to ACL 2026 (Oral).**
 
-[![arXiv](https://img.shields.io/badge/arXiv-2508.07642-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2508.07642)
+[![ACL Anthology](https://img.shields.io/badge/ACL%20Anthology-2026.acl--long.595-1f72bd)](https://aclanthology.org/2026.acl-long.595/)
 [![Project Page](https://img.shields.io/badge/Project-Page-1f72bd)](https://hlr.github.io/SkillNav/)
 [![Annotations](https://img.shields.io/badge/Annotations-Google%20Drive-4285F4?logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1ZYCi2yJAHqk96Ptud6sqQRtWJalIyig7?usp=sharing)
 [![Checkpoints](https://img.shields.io/badge/Checkpoints-Google%20Drive-34A853?logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1dsZgGvgZghdDMF4gE7dPZJW62YzBQTJF?usp=share_link)
@@ -196,13 +196,19 @@ backbone's `moe/` and `prompts/` directories.
 ## 7. Citation
 
 ```bibtex
-@misc{ma2025breakingbuildingupmixture,
-  title  = {Breaking Down and Building Up: Mixture of Skill-Based Vision-and-Language Navigation Agents},
-  author = {Tianyi Ma and Yue Zhang and Zehao Wang and Parisa Kordjamshidi},
-  year   = {2025},
-  eprint = {2508.07642},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.AI},
-  url    = {https://arxiv.org/abs/2508.07642}
+@inproceedings{ma-etal-2026-breaking,
+  title = {Breaking Down and Building Up: Mixture of Skill-Based Vision-and-Language Navigation Agents},
+  author = {Ma, Tianyi and Zhang, Yue and Wang, Zehao and Kordjamshidi, Parisa},
+  editor = {Liakata, Maria and Moreira, Viviane P. and Zhang, Jiajun and Jurgens, David},
+  booktitle = {Proceedings of the 64th Annual Meeting of the {A}ssociation for {C}omputational {L}inguistics (Volume 1: Long Papers)},
+  month = jul,
+  year = {2026},
+  address = {San Diego, California, United States},
+  publisher = {Association for Computational Linguistics},
+  url = {https://aclanthology.org/2026.acl-long.595/},
+  doi = {10.18653/v1/2026.acl-long.595},
+  pages = {13035--13065},
+  ISBN = {979-8-89176-390-6},
+  abstract = {Vision-and-Language Navigation (VLN) poses significant challenges for agents to interpret natural language instructions and navigate complex 3D environments. While recent progress has been driven by large-scale pre-training and data augmentation, current methods still struggle to generalize to unseen scenarios, particularly when complex spatial and temporal reasoning is required. In this work, we propose SkillNav, a modular framework that introduces structured, skill-based reasoning into Transformer-based VLN agents. Our method decomposes navigation into a set of interpretable atomic skills (e.g., Vertical Movement, Area and Region Identification, Stop and Pause), each handled by a specialized agent. To support targeted skill training without manual data annotation, we construct a synthetic dataset pipeline that generates diverse, linguistically natural, skill-specific instruction-trajectory pairs. We then introduce a novel training-free Vision-Language Model (VLM)-based router, which dynamically selects the most suitable agent at each time step by aligning sub-goals with visual observations and previous actions. SkillNav obtains competitive results on commonly used benchmarks and establishes state-of-the-art generalization to the GSA-R2R, a benchmark with novel instruction styles and unseen environments.}
 }
 ```
